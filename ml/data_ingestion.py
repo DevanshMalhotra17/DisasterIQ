@@ -153,7 +153,7 @@ def fetch_flood_data(lat: float, lon: float, radius_km: float = 100.0) -> dict:
         return {
             "usgs_gauge_count":   len(flood_stages),
             "usgs_max_gauge_ft":  max(flood_stages) if flood_stages else 0.0,
-            "usgs_flood_detected": any(g > 15.0 for g in flood_stages),
+            "usgs_flood_detected": any(g > 30.0 for g in flood_stages),
         }
     except Exception as e:
         logger.warning(f"USGS flood data failed: {e}")
