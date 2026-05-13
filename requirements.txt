@@ -23,5 +23,3 @@ psycopg2-binary==2.9.9
 # Utilities
 tqdm==4.66.2
 loguru==0.7.2
-
-echo "3.11" > .python-version
