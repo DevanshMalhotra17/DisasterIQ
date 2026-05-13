@@ -1,0 +1,15 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+ml/data/raw/*
+ml/data/processed/*
+!ml/data/raw/.gitkeep
+!ml/data/processed/.gitkeep
+ml/models/*.pkl
+ml/models/*.json
+node_modules/
+.next/
+venv/
+.venv/
