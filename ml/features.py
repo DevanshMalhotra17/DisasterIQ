@@ -148,7 +148,7 @@ def engineer_features(climate: dict) -> PathogenFeatures:
     sanitation_inv = 1.0 - vuln["sanitation_index"]
     pop_density_normalized = min(vuln["pop_density"] / 30000.0, 1.0)
     water_proximity = float(np.clip(1.0 - (vuln["water_body_dist_km"] / 20.0), 0.0, 1.0))
-    active_disaster = min(climate.get("firms_event_count", 0) / 10.0, 1.0)
+    active_disaster = 1.0 if climate.get("usgs_flood_detected", False) else min(climate.get("usgs_max_gauge_ft", 0.0) / 50.0, 1.0)
 
     return PathogenFeatures(
         flood_severity=flood_severity,

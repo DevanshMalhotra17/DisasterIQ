@@ -15,8 +15,8 @@ matplotlib==3.8.3
 seaborn==0.13.2
 
 # Backend (for later)
-fastapi==0.110.0
-uvicorn==0.29.0
+fastapi==0.115.0
+uvicorn[standard]==0.29.0
 sqlalchemy==2.0.29
 psycopg2-binary==2.9.9
 

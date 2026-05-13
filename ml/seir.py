@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 from typing import List
-from features import PathogenFeatures
+from ml.features import PathogenFeatures
 
 @dataclass
 class DiseaseParams:
