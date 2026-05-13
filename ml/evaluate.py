@@ -1,24 +1,25 @@
 import json
 import numpy as np
+# pyrefly: ignore [missing-import]
 from xgboost import XGBClassifier
+# pyrefly: ignore [missing-import]
 from features import engineer_features
 from seir import run_seir, run_all_diseases, DISEASE_PARAMS
-from data_ingestion import get_mock_climate_inputs
+from ml.mock_test import get_mock_climate_inputs
 
 DISEASES = list(DISEASE_PARAMS.keys())
 LABEL_MAP = {"LOW": 0, "MODERATE": 1, "HIGH": 2, "CRITICAL": 3}
 LABEL_MAP_INV = {v: k for k, v in LABEL_MAP.items()}
 LABEL_ORDER = ["LOW", "MODERATE", "HIGH", "CRITICAL"]
 
-# ---------------------------------------------------------------------------
 # Documented historical outbreak severity (CDC/WHO sources).
 # Used only for calibration offset reporting — NOT as model accuracy target.
 # The model is trained to replicate SEIR outputs; SEIR truth is auto-computed.
-#
+
 # Sources:
 #   Harvey   — Harris County PH post-Harvey report (2017); CDC MMWR (2018)
 #   Chennai  — WHO Disease Outbreak News Dec 2015; India MoH surveillance
-# ---------------------------------------------------------------------------
+
 DOCUMENTED_TRUTH = {
     "houston_harvey": {
         "cholera":       "HIGH",
