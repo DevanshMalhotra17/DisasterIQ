@@ -1,0 +1,174 @@
+{
+  "model_seir_fidelity": 1.0,
+  "correct": 15,
+  "total": 15,
+  "seir_truth_used": {
+    "houston_harvey": {
+      "cholera": "HIGH",
+      "dengue": "HIGH",
+      "malaria": "HIGH",
+      "leptospirosis": "CRITICAL",
+      "salmonella": "LOW"
+    },
+    "chennai_floods": {
+      "cholera": "HIGH",
+      "dengue": "HIGH",
+      "malaria": "CRITICAL",
+      "leptospirosis": "HIGH",
+      "salmonella": "LOW"
+    },
+    "normal_baseline": {
+      "cholera": "LOW",
+      "dengue": "LOW",
+      "malaria": "HIGH",
+      "leptospirosis": "LOW",
+      "salmonella": "LOW"
+    }
+  },
+  "scenarios": {
+    "houston_harvey": {
+      "cholera": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "HIGH",
+        "confidence": 0.9965959191322327,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "dengue": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "LOW",
+        "confidence": 0.998755931854248,
+        "correct": true,
+        "seir_vs_documented": "+2 (over)"
+      },
+      "malaria": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "LOW",
+        "confidence": 0.9993565678596497,
+        "correct": true,
+        "seir_vs_documented": "+2 (over)"
+      },
+      "leptospirosis": {
+        "predicted": "CRITICAL",
+        "seir_truth": "CRITICAL",
+        "documented_truth": "HIGH",
+        "confidence": 0.9993471503257751,
+        "correct": true,
+        "seir_vs_documented": "+1 (over)"
+      },
+      "salmonella": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "MODERATE",
+        "confidence": 0.999213695526123,
+        "correct": true,
+        "seir_vs_documented": "-1 (under)"
+      }
+    },
+    "chennai_floods": {
+      "cholera": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "HIGH",
+        "confidence": 0.9953749775886536,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "dengue": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "MODERATE",
+        "confidence": 0.9967108964920044,
+        "correct": true,
+        "seir_vs_documented": "+1 (over)"
+      },
+      "malaria": {
+        "predicted": "CRITICAL",
+        "seir_truth": "CRITICAL",
+        "documented_truth": "MODERATE",
+        "confidence": 0.9993914365768433,
+        "correct": true,
+        "seir_vs_documented": "+2 (over)"
+      },
+      "leptospirosis": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "HIGH",
+        "confidence": 0.9968403577804565,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "salmonella": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "LOW",
+        "confidence": 0.9997323155403137,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      }
+    },
+    "normal_baseline": {
+      "cholera": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "LOW",
+        "confidence": 0.999909520149231,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "dengue": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "LOW",
+        "confidence": 0.9978450536727905,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "malaria": {
+        "predicted": "HIGH",
+        "seir_truth": "HIGH",
+        "documented_truth": "LOW",
+        "confidence": 0.9991692304611206,
+        "correct": true,
+        "seir_vs_documented": "+2 (over)"
+      },
+      "leptospirosis": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "LOW",
+        "confidence": 0.9997106194496155,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      },
+      "salmonella": {
+        "predicted": "LOW",
+        "seir_truth": "LOW",
+        "documented_truth": "LOW",
+        "confidence": 0.9999635219573975,
+        "correct": true,
+        "seir_vs_documented": "exact"
+      }
+    }
+  },
+  "bootstrap_harvey_leptospirosis": {
+    "peak_infected": {
+      "mean": 117792.97696252493,
+      "lower_95": 116187.53915513781,
+      "upper_95": 119381.67164621055
+    },
+    "total_infected": {
+      "mean": 135955.03767335025,
+      "lower_95": 132955.27689007035,
+      "upper_95": 138998.17042690242
+    },
+    "r0": {
+      "mean": 4.717398243318308,
+      "lower_95": 4.698650160838363,
+      "upper_95": 4.7362995254262055
+    }
+  },
+  "methodology": "SEIR truth auto-computed by running run_all_diseases() on each scenario. XGBoost fidelity measures how well the ML model replicates the SEIR simulation. Documented truth (CDC/WHO) is shown separately as a SEIR calibration reference."
+}
