@@ -1,21 +1,3 @@
-"""
-features.py
------------
-Feature engineering pipeline for Pathogen.
-
-Takes raw climate inputs (from data_ingestion.py or mock_data.py)
-and produces a normalized feature vector ready for the SEIR + XGBoost models.
-
-Each disease has its own feature weighting logic grounded in epidemiology:
-  - Cholera:       flood depth, contaminated water, poor sanitation
-  - Dengue:        stagnant water pools, temperature 20-35C, humidity
-  - Malaria:       standing water, temp 16-32C, humidity >60%
-  - Leptospirosis: flood contact with animal urine, warm temps
-  - Salmonella:    high temps, food/water contamination post-flood
-
-Commit: ml: feature engineering pipeline
-"""
-
 import numpy as np
 from dataclasses import dataclass, field
 from typing import Dict
@@ -193,7 +175,7 @@ if __name__ == "__main__":
         print(f"  temp_normalized:     {f.temp_normalized:.3f}")
         print(f"  humidity_normalized: {f.humidity_normalized:.3f}")
         print(f"  sanitation_inv:      {f.sanitation_inv:.3f}")
-        print(f"  --- Disease Risk Scores ---")
+        print(f"Disease Risk Scores")
         print(f"  Cholera:        {f.cholera_score:.3f}")
         print(f"  Dengue:         {f.dengue_score:.3f}")
         print(f"  Malaria:        {f.malaria_score:.3f}")
