@@ -1,96 +1,172 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import type { PredictResponse, DiseaseRisk } from "@/types";
+import type { PredictResponse, DiseaseRisk, RiskLevel } from "@/types";
+import { RISK_COLOR, RISK_BG, RISK_BORDER, RISK_ORDER, worstRisk } from "@/types";
 import { useState } from "react";
 
-const RISK_COLORS: Record<string, string> = {
-    LOW: "#22c55e",
-    MODERATE: "#f59e0b",
-    HIGH: "#ef4444",
-    CRITICAL: "#7c3aed",
-};
-
-const RISK_BG: Record<string, string> = {
-    LOW: "bg-green-950 border-green-800",
-    MODERATE: "bg-yellow-950 border-yellow-800",
-    HIGH: "bg-red-950 border-red-800",
-    CRITICAL: "bg-purple-950 border-purple-800",
-};
-
-const DISEASE_ICONS: Record<string, string> = {
+const DISEASE_ICON: Record<string, string> = {
     cholera: "💧",
     dengue: "🦟",
     malaria: "🦟",
-    leptospirosis: "🐀",
+    leptospirosis: "🐭",
     salmonella: "🦠",
 };
 
-function RiskBadge({ level }: { level: string }) {
+function RiskBadge({ level }: { level: RiskLevel }) {
     return (
         <span
-            className="text-xs font-bold px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: RISK_COLORS[level] + "33", color: RISK_COLORS[level] }}
+            style={{
+                fontSize: 11,
+                padding: "3px 9px",
+                borderRadius: 20,
+                fontWeight: 500,
+                letterSpacing: "0.03em",
+                background: RISK_BG[level],
+                color: RISK_COLOR[level],
+                border: `1px solid ${RISK_BORDER[level]}`,
+            }}
         >
             {level}
         </span>
     );
 }
 
-function DiseaseCard({ risk }: { risk: DiseaseRisk }) {
-    const [expanded, setExpanded] = useState(false);
-
+function MetricCard({
+    icon,
+    label,
+    value,
+    sub,
+}: {
+    icon: string;
+    label: string;
+    value: string;
+    sub?: string;
+}) {
     return (
         <div
-            className={`rounded-xl border p-4 cursor-pointer transition-all ${RISK_BG[risk.risk_level]}`}
-            onClick={() => setExpanded(!expanded)}
+            style={{
+                background: "var(--bg-elevated)",
+                borderRadius: 10,
+                padding: "10px 12px",
+                border: "1px solid var(--border)",
+            }}
         >
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <span className="text-lg">{DISEASE_ICONS[risk.disease] ?? "🦠"}</span>
-                    <span className="text-white font-semibold capitalize">{risk.disease}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <RiskBadge level={risk.risk_level} />
-                    <span className="text-gray-400 text-xs">{risk.confidence}%</span>
-                    <span className="text-gray-500 text-xs">{expanded ? "▲" : "▼"}</span>
-                </div>
+            <div
+                style={{
+                    fontSize: 11,
+                    color: "rgba(255,255,255,0.45)",
+                    marginBottom: 5,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                }}
+            >
+                <span>{icon}</span> {label}
             </div>
-
-            {expanded && (
-                <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-3 gap-3 text-center">
-                    <div>
-                        <div className="text-gray-400 text-xs">R₀</div>
-                        <div className="text-white font-bold">{risk.r0}</div>
-                    </div>
-                    <div>
-                        <div className="text-gray-400 text-xs">Peak Infected</div>
-                        <div className="text-white font-bold">{risk.peak_infected.toLocaleString()}</div>
-                    </div>
-                    <div>
-                        <div className="text-gray-400 text-xs">Total Infected</div>
-                        <div className="text-white font-bold">{risk.total_infected.toLocaleString()}</div>
-                    </div>
+            <div style={{ fontSize: 17, fontWeight: 600, color: "#fff" }}>{value}</div>
+            {sub && (
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+                    {sub}
                 </div>
             )}
         </div>
     );
 }
 
-function ClimateBar({ label, value, unit, max }: { label: string; value: number; unit: string; max: number }) {
-    const pct = Math.min((value / max) * 100, 100);
+function DiseaseCard({ risk }: { risk: DiseaseRisk }) {
+    const [expanded, setExpanded] = useState(false);
+    const level = risk.risk_level as RiskLevel;
+    const pct = (RISK_ORDER.indexOf(level) / 3) * 100;
+    const confidencePct = risk.confidence;
+
     return (
-        <div>
-            <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-400">{label}</span>
-                <span className="text-white">{value}{unit}</span>
+        <div
+            onClick={() => setExpanded(!expanded)}
+            style={{
+                background: expanded ? RISK_BG[level] : "var(--bg-elevated)",
+                border: `1px solid ${expanded ? RISK_BORDER[level] : "var(--border)"}`,
+                borderRadius: 10,
+                padding: "11px 14px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+            }}
+        >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 15 }}>{DISEASE_ICON[risk.disease] ?? "🦠"}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#fff", textTransform: "capitalize" }}>
+                        {risk.disease}
+                    </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <RiskBadge level={level} />
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", fontFamily: "var(--font-mono)" }}>
+                        {expanded ? "▲" : "▼"}
+                    </span>
+                </div>
             </div>
-            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+
+            {/* Confidence bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div
-                    className="h-full rounded-full bg-blue-500 transition-all duration-500"
-                    style={{ width: `${pct}%` }}
-                />
+                    style={{
+                        flex: 1,
+                        height: 3,
+                        background: "rgba(255,255,255,0.07)",
+                        borderRadius: 2,
+                        overflow: "hidden",
+                    }}
+                >
+                    <div
+                        style={{
+                            height: "100%",
+                            width: `${confidencePct}%`,
+                            background: RISK_COLOR[level],
+                            borderRadius: 2,
+                            transition: "width 0.5s ease",
+                        }}
+                    />
+                </div>
+                <span
+                    style={{
+                        fontSize: 11,
+                        color: "rgba(255,255,255,0.4)",
+                        fontFamily: "var(--font-mono)",
+                        minWidth: 36,
+                        textAlign: "right",
+                    }}
+                >
+                    {risk.confidence.toFixed(1)}%
+                </span>
             </div>
+
+            {expanded && (
+                <div
+                    className="animate-fade-in"
+                    style={{
+                        marginTop: 12,
+                        paddingTop: 12,
+                        borderTop: `1px solid ${RISK_BORDER[level]}`,
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gap: 8,
+                        textAlign: "center",
+                    }}
+                >
+                    {[
+                        { label: "R₀", value: risk.r0.toFixed(2) },
+                        { label: "Peak infected", value: risk.peak_infected.toLocaleString() },
+                        { label: "Total infected", value: risk.total_infected.toLocaleString() },
+                    ].map((s) => (
+                        <div key={s.label}>
+                            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 3 }}>{s.label}</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", fontFamily: "var(--font-mono)" }}>
+                                {s.value}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -99,41 +175,77 @@ interface Props {
     prediction: PredictResponse | null;
     loading: boolean;
     coords: { lat: number; lon: number } | null;
+    onSetAlert?: () => void;
 }
 
-export default function RiskPanel({ prediction, loading, coords }: Props) {
+export default function RiskPanel({ prediction, loading, coords, onSetAlert }: Props) {
     if (!coords && !loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-center px-8">
-                <div className="text-5xl mb-4">🗺️</div>
-                <h2 className="text-white font-bold text-xl mb-2">Click anywhere on the map</h2>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                    Pathogen will fetch real-time weather, flood gauge, and historical rain data,
-                    then run SEIR + XGBoost models to predict outbreak risk for 5 diseases.
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                    padding: "0 32px",
+                    textAlign: "center",
+                }}
+            >
+                <div style={{ fontSize: 40, marginBottom: 16 }}>🌍</div>
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginBottom: 8 }}>
+                    Click anywhere on the map
+                </h2>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.7 }}>
+                    DisasterIQ fetches live weather, USGS flood gauges, and historical rain data, then runs
+                    SEIR + XGBoost models to predict outbreak risk for 5 diseases.
                 </p>
-                <div className="mt-6 grid grid-cols-2 gap-2 w-full">
-                    {["Cholera", "Dengue", "Malaria", "Leptospirosis"].map((d) => (
-                        <div key={d} className="bg-gray-800 rounded-lg p-3 text-center">
-                            <div className="text-gray-300 text-xs font-medium">{d}</div>
+                <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, width: "100%" }}>
+                    {["Cholera", "Dengue", "Malaria", "Leptospirosis", "Salmonella"].map((d) => (
+                        <div
+                            key={d}
+                            style={{
+                                background: "var(--bg-elevated)",
+                                border: "1px solid var(--border)",
+                                borderRadius: 8,
+                                padding: "10px 12px",
+                                fontSize: 12,
+                                color: "rgba(255,255,255,0.5)",
+                                textAlign: "center",
+                            }}
+                        >
+                            {DISEASE_ICON[d.toLowerCase()] ?? "🦠"} {d}
                         </div>
                     ))}
                 </div>
+                <p style={{ marginTop: 24, fontSize: 11, color: "rgba(255,255,255,0.2)" }}>
+                    OWM · USGS · Open-Meteo · SEIR · XGBoost
+                </p>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <div className="text-center">
-                    <div className="text-white font-semibold">Fetching live data...</div>
-                    <div className="text-gray-400 text-sm mt-1">
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 16 }}>
+                <div
+                    style={{
+                        width: 40,
+                        height: 40,
+                        border: "3px solid var(--border-strong)",
+                        borderTopColor: "var(--teal)",
+                        borderRadius: "50%",
+                        animation: "spin 0.8s linear infinite",
+                    }}
+                />
+                <div style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: "#fff" }}>Analyzing risk factors…</div>
+                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>
                         OWM · Open-Meteo · USGS
                     </div>
                 </div>
                 {coords && (
-                    <div className="text-gray-500 text-xs font-mono">
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", fontFamily: "var(--font-mono)" }}>
                         {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}
                     </div>
                 )}
@@ -144,66 +256,135 @@ export default function RiskPanel({ prediction, loading, coords }: Props) {
     if (!prediction) return null;
 
     const c = prediction.climate_summary;
-    const worstRisk = prediction.risks.reduce((max, r) => {
-        const levels = ["LOW", "MODERATE", "HIGH", "CRITICAL"];
-        return levels.indexOf(r.risk_level) > levels.indexOf(max.risk_level) ? r : max;
-    });
+    const worst = worstRisk(prediction.risks);
+    const sorted = [...prediction.risks].sort(
+        (a, b) =>
+            RISK_ORDER.indexOf(b.risk_level as RiskLevel) -
+            RISK_ORDER.indexOf(a.risk_level as RiskLevel)
+    );
 
     return (
-        <div className="p-4 space-y-4">
+        <div className="animate-fade-in" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
             {/* Location header */}
-            <div className="bg-gray-800 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-1">
-                    <span className="text-gray-400 text-xs font-mono">
-                        {prediction.lat.toFixed(4)}, {prediction.lon.toFixed(4)}
+            <div
+                style={{
+                    padding: "14px 16px 12px",
+                    borderBottom: "1px solid var(--border)",
+                }}
+            >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#fff" }}>
+                        📍 {prediction.lat.toFixed(3)}°, {prediction.lon.toFixed(3)}°
                     </span>
-                    <RiskBadge level={worstRisk.risk_level} />
+                    <RiskBadge level={worst} />
                 </div>
-                <div className="flex items-center gap-2 mt-2">
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {prediction.usgs_flood_detected && (
-                        <span className="text-xs bg-blue-900 text-blue-300 border border-blue-700 px-2 py-0.5 rounded-full">
-                            Flood Detected
+                        <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, background: "rgba(55,138,221,0.15)", color: "#85b7eb", border: "1px solid rgba(55,138,221,0.3)" }}>
+                            🌊 Flood alert
                         </span>
                     )}
-                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                        {prediction.days_since_heavy_rain === 999 ? "No recent rain" : `Rain ${prediction.days_since_heavy_rain}d ago`}
+                    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 20, background: "var(--bg-elevated)", color: "rgba(255,255,255,0.4)", border: "1px solid var(--border)" }}>
+                        {prediction.days_since_heavy_rain === 999
+                            ? "No recent heavy rain"
+                            : `Heavy rain ${prediction.days_since_heavy_rain}d ago`}
                     </span>
                 </div>
             </div>
 
-            {/* Climate summary */}
-            <div className="bg-gray-800 rounded-xl p-4 space-y-3">
-                <h3 className="text-gray-300 text-xs font-semibold uppercase tracking-wider">
-                    Climate Conditions
-                </h3>
-                <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Weather</span>
-                    <span className="text-white">{c.weather_main}</span>
+            {/* Scrollable content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
+                {/* Metrics grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+                    <MetricCard icon="🌡️" label="Temperature" value={`${c.temp_c.toFixed(1)}°C`} sub={`Feels like ${c.temp_c.toFixed(0)}°`} />
+                    <MetricCard icon="💧" label="Humidity" value={`${c.humidity_pct}%`} sub={c.weather_main} />
+                    <MetricCard
+                        icon="🌊"
+                        label="USGS gauges"
+                        value={`${prediction.usgs_flood_detected ? "⚠️ " : ""}Active`}
+                        sub="Live flood monitoring"
+                    />
+                    <MetricCard
+                        icon="🌧️"
+                        label="Rain history"
+                        value={prediction.days_since_heavy_rain === 999 ? "None" : `${prediction.days_since_heavy_rain}d`}
+                        sub="Since heavy rain"
+                    />
                 </div>
-                <ClimateBar label="Temperature" value={c.temp_c} unit="°C" max={50} />
-                <ClimateBar label="Humidity" value={c.humidity_pct} unit="%" max={100} />
-                <ClimateBar label="Rain (1h)" value={c.rain_1h_mm} unit="mm" max={100} />
-                <ClimateBar label="Forecast Rain" value={c.forecast_max_rain_mm} unit="mm" max={200} />
-            </div>
 
-            {/* Disease risk cards */}
-            <div className="space-y-2">
-                <h3 className="text-gray-300 text-xs font-semibold uppercase tracking-wider px-1">
-                    Disease Risk Assessment
-                </h3>
-                {prediction.risks
-                    .sort((a, b) => {
-                        const levels = ["LOW", "MODERATE", "HIGH", "CRITICAL"];
-                        return levels.indexOf(b.risk_level) - levels.indexOf(a.risk_level);
-                    })
-                    .map((risk) => (
-                        <DiseaseCard key={risk.disease} risk={risk} />
+                {/* Forecast rain bar */}
+                {c.forecast_max_rain_mm > 0 && (
+                    <div
+                        style={{
+                            background: "var(--bg-elevated)",
+                            border: "1px solid var(--border)",
+                            borderRadius: 10,
+                            padding: "10px 14px",
+                            marginBottom: 16,
+                        }}
+                    >
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>⛈️ Forecast rain (5d max)</span>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: "#fff", fontFamily: "var(--font-mono)" }}>
+                                {c.forecast_max_rain_mm.toFixed(1)} mm
+                            </span>
+                        </div>
+                        <div style={{ height: 4, background: "rgba(255,255,255,0.07)", borderRadius: 2, overflow: "hidden" }}>
+                            <div
+                                style={{
+                                    height: "100%",
+                                    width: `${Math.min((c.forecast_max_rain_mm / 100) * 100, 100)}%`,
+                                    background: "linear-gradient(90deg, #378add, #5dcaa5)",
+                                    borderRadius: 2,
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Disease cards */}
+                <div style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Outbreak risk · 5 diseases
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {sorted.map((r) => (
+                        <DiseaseCard key={r.disease} risk={r} />
                     ))}
+                </div>
             </div>
 
-            <p className="text-gray-600 text-xs text-center pb-2">
-                Powered by SEIR + XGBoost · OWM · USGS · Open-Meteo
-            </p>
+            {/* Footer */}
+            <div
+                style={{
+                    padding: "10px 16px",
+                    borderTop: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}
+            >
+                <button
+                    onClick={onSetAlert}
+                    style={{
+                        background: "var(--teal)",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 8,
+                        padding: "7px 14px",
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                    }}
+                >
+                    🔔 Set SMS alert
+                </button>
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>
+                    OWM · USGS · Open-Meteo
+                </span>
+            </div>
         </div>
     );
 }
