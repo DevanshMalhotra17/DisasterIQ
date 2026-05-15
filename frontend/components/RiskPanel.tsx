@@ -77,7 +77,7 @@ function DiseaseCard({ risk }: { risk: DiseaseRisk }) {
     const [expanded, setExpanded] = useState(false);
     const level = risk.risk_level as RiskLevel;
     const pct = (RISK_ORDER.indexOf(level) / 3) * 100;
-    const confidencePct = risk.confidence;
+    const confidencePct = ((RISK_ORDER.indexOf(level) + 1) / 4) * 100;
 
     return (
         <div
@@ -136,7 +136,9 @@ function DiseaseCard({ risk }: { risk: DiseaseRisk }) {
                         textAlign: "right",
                     }}
                 >
-                    {risk.confidence.toFixed(1)}%
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "var(--font-mono)", minWidth: 60, textAlign: "right" }}>
+                        {risk.confidence.toFixed(1)}% conf.
+                    </span>
                 </span>
             </div>
 
@@ -296,22 +298,11 @@ export default function RiskPanel({ prediction, loading, coords, onSetAlert }: P
             <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
                 {/* Metrics grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
-                    <MetricCard icon="🌡️" label="Temperature" value={`${c.temp_c.toFixed(1)}°C`} sub={`Feels like ${c.temp_c.toFixed(0)}°`} />
-                    <MetricCard icon="💧" label="Humidity" value={`${c.humidity_pct}%`} sub={c.weather_main} />
-                    <MetricCard
-                        icon="🌊"
-                        label="USGS gauges"
-                        value={`${prediction.usgs_flood_detected ? "⚠️ " : ""}Active`}
-                        sub="Live flood monitoring"
-                    />
-                    <MetricCard
-                        icon="🌧️"
-                        label="Rain history"
-                        value={prediction.days_since_heavy_rain === 999 ? "None" : `${prediction.days_since_heavy_rain}d`}
-                        sub="Since heavy rain"
-                    />
+                    <MetricCard icon="🌡️" label="Temperature" value={c?.temp_c != null ? `${c.temp_c.toFixed(1)}°C` : "N/A"} sub={c?.temp_c != null ? `Feels like ${c.temp_c.toFixed(0)}°` : undefined} />
+                    <MetricCard icon="💧" label="Humidity" value={c?.humidity_pct != null ? `${c.humidity_pct}%` : "N/A"} sub={c?.weather_main ?? undefined} />
+                    <MetricCard icon="🌊" label="USGS gauges" value={prediction.usgs_flood_detected ? "⚠️ Active" : "Active"} sub="Live flood monitoring" />
+                    <MetricCard icon="🌧️" label="Rain history" value={prediction.days_since_heavy_rain === 999 ? "None" : `${prediction.days_since_heavy_rain}d`} sub="Since heavy rain" />
                 </div>
-
                 {/* Forecast rain bar */}
                 {c.forecast_max_rain_mm > 0 && (
                     <div

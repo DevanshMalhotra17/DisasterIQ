@@ -44,7 +44,7 @@ export default function Map({ onMapClick, coords, prediction, loading }: Props) 
             zoomControl={true}
         >
             <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/dark_matter_no_labels/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 attribution='&copy; <a href="https://carto.com/">CARTO</a>'
             />
             {/* Country outlines only — cleaner look */}
